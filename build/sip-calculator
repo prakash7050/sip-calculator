@@ -1,1 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All-in-One Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #fff;
+            --secondary-color: #eee;
+            --accent-color-1: #4fa8ff;
+            --accent-color-2: #ff764f;
+            --interest-color: #4caf50;
+            --bg-gradient-start: #1c265b;
+            --bg-gradient-end: #562e63;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(31, 38, 135, 0.37);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--primary-color);
+            padding: 20px;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 80px; 
+        }
+        header { width: 100%; max-width: 420px; margin-bottom: 25px; }
+        nav { display: flex; background: var(--card-bg); border-radius: 25px; padding: 8px; border: 1px solid var(--card-border); }
+        nav button {
+            flex: 1; padding: 10px 5px; margin: 0 4px; border: none; background: transparent;
+            color: var(--secondary-color); font-family: 'Poppins', sans-serif; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; border-radius: 20px; transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        nav button.active-nav { background-color: var(--accent-color-1); color: var(--primary-color); box-shadow: 0 2px 10px rgba(79, 168, 255, 0.3); }
+        main { width: 100%; max-width: 420px; }
+        .calculator-container {
+            background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px; border: 1px solid var(--card-border); box-shadow: 0 8px 32px 0 var(--shadow-color);
+            padding: 30px; width: 100%; display: flex; flex-direction: column; gap: 20px;
+        }
+        .page-container { display: none; }
+        h2 { text-align: center; font-size: 1.5rem; font-weight: 600; margin-bottom: 10px; border-bottom: 2px solid var(--accent-color-1); padding-bottom: 10px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: 500; opacity: 0.9; }
+        input[type="number"], select {
+            -moz-appearance: none; -webkit-appearance: none; appearance: none;
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);
+            background: rgba(0,0,0,0.2); color: var(--primary-color); font-size: 1rem; font-family: 'Poppins', sans-serif;
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"]:focus, select:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-color-1); }
+        select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: .65em auto; }
+        .main-action-btn { padding: 15px; border-radius: 10px; border: 1px solid var(--accent-color-1); background-color: transparent; color: var(--primary-color); font-size: 1.1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .main-action-btn:hover { background-color: var(--accent-color-1); transform: translateY(-3px); box-shadow: 0 4px 15px rgba(79, 168, 255, 0.4); }
+        .main-action-btn:active { transform: translateY(0px) scale(0.98); box-shadow: none; }
+        .toggle-group { display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: -10px; margin-bottom: 10px; }
+        .toggle-group label { cursor: pointer; font-size: 0.9em; opacity: 0.9; }
+        .toggle-group input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-color-1); }
+        .radio-toggle-group { display: flex; background-color: rgba(0,0,0,0.2); border-radius: 10px; padding: 5px; margin-bottom: -5px; }
+        .radio-toggle-group input[type="radio"] { display: none; }
+        .radio-toggle-group label { flex: 1; padding: 8px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 500; transition: background-color 0.3s ease; }
+        .radio-toggle-group input[type="radio"]:checked + label { background-color: var(--accent-color-1); color: var(--primary-color); }
+        .result-card { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; margin-top: 15px; text-align: center; display: none; transition: all 0.3s ease; }
+        .result-card h3 { font-weight: 400; margin-bottom: 5px; opacity: 0.8; font-size: 0.9rem; }
+        .result-card p { font-size: 1.8rem; font-weight: 600; color: var(--accent-color-1); }
+        .result-card .total-investment { font-size: 1.2rem; color: var(--secondary-color); }
+        .result-card .total-interest { font-size: 1.5rem; color: var(--interest-color); }
+        .result-card hr { border: 0; height: 1px; background: var(--card-border); margin: 15px 0; }
+        #normal-calculator .display { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px; text-align: right; font-size: 2.5rem; margin-bottom: 20px; word-wrap: break-word; word-break: break-all; min-height: 80px; }
+        #normal-calculator .buttons-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        #normal-calculator .buttons-grid button { padding: 20px; font-size: 1.4rem; border-radius: 10px; border: 1px solid var(--card-border); background-color: transparent; color: var(--primary-color); cursor: pointer; transition: all 0.2s ease-in-out; }
+        #normal-calculator .buttons-grid button:hover { transform: translateY(-3px); box-shadow: 0 4px 15px var(--shadow-color); }
+        #normal-calculator .buttons-grid button:active { transform: translateY(0) scale(0.98); box-shadow: none; }
+        #normal-calculator .operator { border-color: var(--accent-color-2); }
+        #normal-calculator .operator:hover { background-color: var(--accent-color-2); box-shadow: 0 4px 15px rgba(255, 118, 79, 0.4); }
+        #normal-calculator .equals { border-color: var(--interest-color); }
+        #normal-calculator .equals:hover { background-color: var(--interest-color); box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); }
+        #history-list { max-height: 400px; overflow-y: auto; padding-right: 10px; }
+        .history-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; border-left: 4px solid var(--accent-color-1); word-break: break-all; }
+        .history-item.normal-calc { border-left-color: var(--accent-color-2); }
+        #clear-history-btn { border-color: var(--accent-color-2); }
+        #clear-history-btn:hover { background-color: var(--accent-color-2); box-shadow: 0 4px 15px rgba(255, 118, 79, 0.4); }
+        #gst-rate-group { display: flex; gap: 10px; }
+        #gstCustomRate { display: none; }
+        #ad-banner-container { position: fixed; bottom: 0; left: 0; width: 100%; min-height: 50px; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; border-top: 1px solid var(--card-border); }
 
+        @media (max-width: 480px) {
+            body { padding: 15px 10px 80px 10px; }
+            .calculator-container { padding: 20px 15px; gap: 15px; }
+            h2 { font-size: 1.3rem; }
+            nav button { font-size: 0.75rem; padding: 8px 4px; margin: 0 2px; }
+            .main-action-btn { padding: 12px; font-size: 1rem; }
+            .radio-toggle-group label { font-size: 0.9rem; }
+            .result-card p { font-size: 1.5rem; }
+            .result-card .total-investment { font-size: 1rem; }
+            .result-card .total-interest { font-size: 1.2rem; }
+            #normal-calculator .display { font-size: 2.2rem; min-height: 70px; }
+            #normal-calculator .buttons-grid { gap: 10px; }
+            #normal-calculator .buttons-grid button { padding: 15px 10px; font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <button id="showSipBtn">SIP/Lumpsum</button>
+            <button id="showGstBtn">GST Calculator</button>
+            <button id="showNormalBtn">Normal Calc</button>
+            <button id="showHistoryBtn">History</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Investment Calculator Page -->
+        <div id="sip-page" class="page-container calculator-container">
+            <h2>Investment Calculator</h2>
+            <div class="radio-toggle-group">
+                <input type="radio" id="typeSip" name="investmentType" value="sip" checked><label for="typeSip">Monthly (SIP)</label>
+                <input type="radio" id="typeLumpsum" name="investmentType" value="lumpsum"><label for="typeLumpsum">One-Time (Lumpsum)</label>
+            </div>
+            <div class="input-group"><label for="investmentAmount" id="investmentAmountLabel">Monthly Investment (Rs.)</label><input type="number" id="investmentAmount" placeholder="e.g., 5000" inputmode="numeric"></div>
+            <div class="input-group"><label for="interestRate">Expected Annual Return (%)</label><input type="number" id="interestRate" placeholder="e.g., 12" inputmode="decimal"></div>
+            <div class="input-group"><label for="investmentDuration">Investment Duration (Years)</label><input type="number" id="investmentDuration" placeholder="e.g., 10" inputmode="numeric"></div>
+            <div class="toggle-group"><input type="checkbox" id="liveUpdateToggle"><label for="liveUpdateToggle">Show Live Update</label></div>
+            <button id="calculateSipBtn" class="main-action-btn">Search</button>
+            <div class="result-card" id="sipResult">
+                <div><h3 id="resultPrincipalLabel">Total Investment</h3><p class="total-investment" id="totalInvestmentValue">Rs. 0</p></div><hr>
+                <div><h3 id="resultInterestLabel">Total Interest Earned</h3><p class="total-interest" id="totalInterestValue">Rs. 0</p></div><hr>
+                <div><h3>Estimated Maturity Amount</h3><p id="maturityAmountValue">Rs. 0</p></div>
+            </div>
+        </div>
+
+        <!-- GST Calculator Page -->
+        <div id="gst-page" class="page-container calculator-container">
+            <h2>GST Calculator</h2>
+            <div class="radio-toggle-group">
+                <input type="radio" id="gstAdd" name="gstAction" value="add" checked><label for="gstAdd">Add GST</label>
+                <input type="radio" id="gstRemove" name="gstAction" value="remove"><label for="gstRemove">Remove GST</label>
+            </div>
+            <div class="input-group"><label for="gstInitialAmount">Initial Amount (Rs.)</label><input type="number" id="gstInitialAmount" placeholder="e.g., 1000" inputmode="numeric"></div>
+            <div class="input-group"><label for="gstRate">GST Rate (%)</label>
+                <div id="gst-rate-group">
+                    <select id="gstRate"><option value="3">3%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option><option value="custom">Custom</option></select>
+                    <input type="number" id="gstCustomRate" placeholder="Custom %" inputmode="decimal">
+                </div>
+            </div>
+            <!-- UPDATED: Button text changed to "Search" -->
+            <button id="calculateGstBtn" class="main-action-btn">Search</button>
+            <div class="result-card" id="gstResult">
+                <div><h3 id="gstInitialLabel">Initial Amount</h3><p class="total-investment" id="gstInitialValue">Rs. 0</p></div><hr>
+                <div><h3>GST Amount</h3><p class="total-interest" id="gstAmountValue">Rs. 0</p></div><hr>
+                <div><h3 id="gstFinalLabel">Final Amount</h3><p id="gstFinalValue">Rs. 0</p></div>
+            </div>
+        </div>
+        
+        <!-- Normal Calculator Page -->
+        <div id="normal-calculator" class="page-container calculator-container">
+            <h2>Normal Calculator</h2>
+            <div class="display" id="normalCalcDisplay">0</div>
+            <div class="buttons-grid">
+                <button class="operator">C</button><button class="operator">%</button><button class="operator">/</button><button class="operator">×</button>
+                <button>7</button><button>8</button><button>9</button><button class="operator">-</button>
+                <button>4</button><button>5</button><button>6</button><button class="operator">+</button>
+                <button>1</button><button>2</button><button>3</button><button class="equals" style="grid-row: span 2;">=</button>
+                <button style="grid-column: span 2;">0</button><button>.</button>
+            </div>
+        </div>
+        
+        <!-- History Page -->
+        <div id="history-page" class="page-container calculator-container">
+            <h2>Calculation History</h2>
+            <div id="history-list"><p>No history yet.</p></div>
+            <button id="clear-history-btn" class="main-action-btn">Clear History</button>
+        </div>
+    </main>
+
+    <div id="ad-banner-container">
+        <p>Advertisement Banner</p>
+    </div>
+
+    <script>
+        // The JavaScript code remains exactly the same as the previous version.
+        (function() {
+            let calculationHistory = [];
+            const navButtons = { sip: document.getElementById('showSipBtn'), gst: document.getElementById('showGstBtn'), normal: document.getElementById('showNormalBtn'), history: document.getElementById('showHistoryBtn') };
+            const pages = { sip: document.getElementById('sip-page'), gst: document.getElementById('gst-page'), normal: document.getElementById('normal-calculator'), history: document.getElementById('history-page') };
+            
+            const formatToRupees = (num) => 'Rs. ' + num.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+            const showPage = (pageName) => {
+                Object.values(pages).forEach(p => p.style.display = 'none');
+                Object.values(navButtons).forEach(b => b.classList.remove('active-nav'));
+                pages[pageName].style.display = 'flex';
+                navButtons[pageName].classList.add('active-nav');
+                if (pageName === 'history') renderHistory();
+            };
+
+            const addToHistory = (entry, type) => calculationHistory.unshift({ text: entry, type });
+            const renderHistory = () => {
+                const historyListEl = document.getElementById('history-list');
+                historyListEl.innerHTML = calculationHistory.length === 0 ? '<p>No history yet.</p>' :
+                    calculationHistory.map(item => `<div class="history-item ${item.type === 'normal' ? 'normal-calc' : 'sip-calc'}">${item.text}</div>`).join('');
+            };
+
+            (function setupInvestmentCalculator() {
+                const typeToggle = document.querySelectorAll('input[name="investmentType"]');
+                const amountLabel = document.getElementById('investmentAmountLabel');
+                const inputs = { amount: document.getElementById('investmentAmount'), rate: document.getElementById('interestRate'), duration: document.getElementById('investmentDuration') };
+                const liveToggle = document.getElementById('liveUpdateToggle');
+                const calcBtn = document.getElementById('calculateSipBtn');
+                const resultEl = document.getElementById('sipResult');
+                const principalLabel = document.getElementById('resultPrincipalLabel');
+                const interestLabel = document.getElementById('resultInterestLabel');
+
+                const calculate = () => {
+                    const type = document.querySelector('input[name="investmentType"]:checked').value;
+                    const P = parseFloat(inputs.amount.value); const R = parseFloat(inputs.rate.value); const T = parseFloat(inputs.duration.value);
+                    if (isNaN(P) || isNaN(R) || isNaN(T) || P <= 0 || R <= 0 || T <= 0) return null;
+                    let maturity, totalInvestment, totalInterest;
+                    if (type === 'sip') {
+                        const i = R / 12 / 100, n = T * 12;
+                        maturity = P * (Math.pow(1 + i, n) - 1) / i;
+                        totalInvestment = P * n;
+                    } else {
+                        totalInvestment = P;
+                        maturity = P * Math.pow(1 + (R / 100), T);
+                    }
+                    totalInterest = maturity - totalInvestment;
+                    return { totalInvestment, totalInterest, maturity, P, R, T, type };
+                };
+                const updateUI = (res) => {
+                    if (!res) { resultEl.style.display = 'none'; return; }
+                    principalLabel.innerText = res.type === 'sip' ? "Total Investment" : "Principal Amount";
+                    interestLabel.innerText = res.type === 'sip' ? "Total Interest Earned" : "Estimated Returns";
+                    document.getElementById('totalInvestmentValue').innerHTML = formatToRupees(res.totalInvestment);
+                    document.getElementById('totalInterestValue').innerHTML = formatToRupees(res.totalInterest);
+                    document.getElementById('maturityAmountValue').innerHTML = formatToRupees(res.maturity);
+                    resultEl.style.display = 'block';
+                };
+                typeToggle.forEach(r => r.addEventListener('change', e => {
+                    amountLabel.innerText = e.target.value === 'sip' ? "Monthly Investment (Rs.)" : "Total Investment (Rs.)";
+                    resultEl.style.display = 'none';
+                }));
+                calcBtn.addEventListener('click', () => {
+                    const res = calculate();
+                    if (res) {
+                        updateUI(res);
+                        let h = res.type === 'sip' ? `SIP: ${formatToRupees(res.P)}/mo @ ${res.R}% for ${res.T} Yrs` : `Lumpsum: ${formatToRupees(res.P)} @ ${res.R}% for ${res.T} Yrs`;
+                        addToHistory(`${h} ➔ <b>${formatToRupees(res.maturity)}</b>`, 'investment');
+                    } else { alert("Please enter valid positive numbers."); }
+                });
+                Object.values(inputs).forEach(i => i.addEventListener('input', () => { if (liveToggle.checked) updateUI(calculate()); }));
+            })();
+
+            (function setupGstCalculator() {
+                const actionToggle = document.querySelectorAll('input[name="gstAction"]');
+                const initialAmountInput = document.getElementById('gstInitialAmount');
+                const rateSelect = document.getElementById('gstRate');
+                const customRateInput = document.getElementById('gstCustomRate');
+                const calcBtn = document.getElementById('calculateGstBtn');
+                const resultEl = document.getElementById('gstResult');
+
+                const calculate = () => {
+                    const action = document.querySelector('input[name="gstAction"]:checked').value;
+                    const initialAmount = parseFloat(initialAmountInput.value);
+                    let rate = rateSelect.value === 'custom' ? parseFloat(customRateInput.value) : parseFloat(rateSelect.value);
+                    if (isNaN(initialAmount) || isNaN(rate) || initialAmount <= 0 || rate <= 0) return null;
+                    let gstAmount, finalAmount, baseAmount;
+                    if (action === 'add') {
+                        baseAmount = initialAmount;
+                        gstAmount = baseAmount * (rate / 100);
+                        finalAmount = baseAmount + gstAmount;
+                    } else {
+                        baseAmount = initialAmount / (1 + (rate / 100));
+                        gstAmount = initialAmount - baseAmount;
+                        finalAmount = baseAmount;
+                    }
+                    return { initialAmount, gstAmount, finalAmount, rate, action, baseAmount };
+                };
+                const updateUI = (res) => {
+                    if (!res) { resultEl.style.display = 'none'; return; }
+                    const initialLabel = document.getElementById('gstInitialLabel');
+                    const finalLabel = document.getElementById('gstFinalLabel');
+                    if (res.action === 'add') {
+                        initialLabel.innerText = "Initial Amount";
+                        finalLabel.innerText = "Final Amount";
+                        document.getElementById('gstInitialValue').innerHTML = formatToRupees(res.initialAmount);
+                        document.getElementById('gstFinalValue').innerHTML = formatToRupees(res.finalAmount);
+                    } else {
+                        initialLabel.innerText = "Gross Amount";
+                        finalLabel.innerText = "Net Amount";
+                        document.getElementById('gstInitialValue').innerHTML = formatToRupees(res.initialAmount);
+                        document.getElementById('gstFinalValue').innerHTML = formatToRupees(res.finalAmount);
+                    }
+                    document.getElementById('gstAmountValue').innerHTML = formatToRupees(res.gstAmount);
+                    resultEl.style.display = 'block';
+                };
+                rateSelect.addEventListener('change', () => {
+                    customRateInput.style.display = rateSelect.value === 'custom' ? 'block' : 'none';
+                    updateUI(calculate());
+                });
+                // UPDATED: JavaScript logic for the GST button click
+                calcBtn.addEventListener('click', () => {
+                    const res = calculate();
+                    if (res) {
+                        updateUI(res);
+                        let h = res.action === 'add' ? `Add ${res.rate}% GST to ${formatToRupees(res.initialAmount)}` : `Remove ${res.rate}% GST from ${formatToRupees(res.initialAmount)}`;
+                        // Changed the result text for history to show Net amount.
+                        addToHistory(`${h} ➔ Net: <b>${formatToRupees(res.finalAmount)}</b>`, 'investment');
+                    } else { alert("Please enter a valid amount and rate."); }
+                });
+                [initialAmountInput, customRateInput, ...actionToggle].forEach(el => el.addEventListener('input', () => updateUI(calculate())));
+            })();
+
+            (function setupNormalCalculator() {
+                const display = document.getElementById('normalCalcDisplay');
+                let currentInput = '';
+                const updateDisplay = () => { display.innerHTML = currentInput.replace(/\*/g, '×') || '0'; };
+                document.querySelector('#normal-calculator .buttons-grid').addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'BUTTON') return;
+                    const value = e.target.innerText;
+                    if (value === 'C') currentInput = '';
+                    else if (value === '%') {
+                        if (currentInput && currentInput !== 'Error') {
+                            try { currentInput = (eval(currentInput) / 100).toString(); } catch { currentInput = 'Error'; }
+                        }
+                    } else if (value === '=') {
+                        if (currentInput && currentInput !== 'Error') {
+                            try {
+                                let result = eval(currentInput);
+                                result = parseFloat(result.toPrecision(12));
+                                addToHistory(`${currentInput.replace(/\*/g, '×')} = <b>${result}</b>`, 'normal');
+                                currentInput = result.toString();
+                            } catch { currentInput = 'Error'; }
+                        }
+                    } else {
+                        if (currentInput === '0' || currentInput === 'Error') currentInput = '';
+                        currentInput += (value === '×' ? '*' : value);
+                    }
+                    updateDisplay();
+                });
+            })();
+            
+            function init() {
+                Object.keys(navButtons).forEach(key => navButtons[key].addEventListener('click', () => showPage(key)));
+                document.getElementById('clear-history-btn').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to clear all history?')) {
+                        calculationHistory = [];
+                        renderHistory();
+                    }
+                });
+                showPage('sip');
+            }
+            init();
+        })();
+    </script>
+</body>
+</html>
